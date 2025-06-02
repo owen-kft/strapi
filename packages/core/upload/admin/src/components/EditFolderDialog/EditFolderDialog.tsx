@@ -10,6 +10,7 @@ import {
   Modal,
   TextInput,
   Typography,
+  VisuallyHidden,
 } from '@strapi/design-system';
 import { Form, Formik, FormikErrors } from 'formik';
 import isEmpty from 'lodash/isEmpty';
@@ -64,6 +65,7 @@ export const EditFolderContent = ({
   });
   const { canCreate, isLoading: isLoadingPermissions, canUpdate } = useMediaLibraryPermissions();
   const [showConfirmDialog, setShowConfirmDialog] = React.useState(false);
+  const submitButtonRef = React.useRef<HTMLButtonElement>(null);
   const { formatMessage, formatDate } = useIntl();
   const { trackUsage } = useTracking();
   const { editFolder, isLoading: isEditFolderLoading } = useEditFolder();
@@ -184,100 +186,111 @@ export const EditFolderContent = ({
         initialValues={initialFormData}
       >
         {({ values, errors, handleChange, setFieldValue }) => (
-          <Form noValidate>
+          <>
             <EditFolderModalHeader isEditing={isEditing} />
             <Modal.Body>
-              <Grid.Root gap={4}>
-                {isEditing && (
-                  <Grid.Item xs={12} col={12} direction="column" alignItems="stretch">
-                    <ContextInfo
-                      blocks={[
-                        {
-                          label: formatMessage({
-                            id: getTrad('modal.folder.create.elements'),
-                            defaultMessage: 'Elements',
-                          }),
-                          value: formatMessage(
-                            {
-                              id: getTrad('modal.folder.elements.count'),
-                              defaultMessage: '{folderCount} folders, {assetCount} assets',
-                            },
-                            {
-                              assetCount: folder?.files?.count ?? 0,
-                              folderCount: folder?.children?.count ?? 0,
-                            }
-                          ),
-                        },
+              <Form noValidate>
+                <Grid.Root gap={4}>
+                  {isEditing && (
+                    <Grid.Item xs={12} col={12} direction="column" alignItems="stretch">
+                      <ContextInfo
+                        blocks={[
+                          {
+                            label: formatMessage({
+                              id: getTrad('modal.folder.create.elements'),
+                              defaultMessage: 'Elements',
+                            }),
+                            value: formatMessage(
+                              {
+                                id: getTrad('modal.folder.elements.count'),
+                                defaultMessage: '{folderCount} folders, {assetCount} assets',
+                              },
+                              {
+                                assetCount: folder?.files?.count ?? 0,
+                                folderCount: folder?.children?.count ?? 0,
+                              }
+                            ),
+                          },
 
-                        {
-                          label: formatMessage({
-                            id: getTrad('modal.folder.create.creation-date'),
-                            defaultMessage: 'Creation Date',
-                          }),
-                          value: formatDate(new Date(folder.createdAt!)),
-                        },
-                      ]}
-                    />
+                          {
+                            label: formatMessage({
+                              id: getTrad('modal.folder.create.creation-date'),
+                              defaultMessage: 'Creation Date',
+                            }),
+                            value: formatDate(new Date(folder.createdAt!)),
+                          },
+                        ]}
+                      />
+                    </Grid.Item>
+                  )}
+
+                  <Grid.Item xs={12} col={6} direction="column" alignItems="stretch">
+                    <Field.Root
+                      name="name"
+                      error={typeof errors.name === 'string' ? errors.name : undefined}
+                    >
+                      <Field.Label>
+                        {formatMessage({
+                          id: getTrad('form.input.label.folder-name'),
+                          defaultMessage: 'Name',
+                        })}
+                      </Field.Label>
+                      <TextInput
+                        value={values.name}
+                        onChange={handleChange}
+                        disabled={formDisabled}
+                      />
+                      <Field.Error />
+                    </Field.Root>
                   </Grid.Item>
-                )}
 
-                <Grid.Item xs={12} col={6} direction="column" alignItems="stretch">
-                  <Field.Root
-                    name="name"
-                    error={typeof errors.name === 'string' ? errors.name : undefined}
-                  >
-                    <Field.Label>
-                      {formatMessage({
-                        id: getTrad('form.input.label.folder-name'),
-                        defaultMessage: 'Name',
-                      })}
-                    </Field.Label>
-                    <TextInput
-                      value={values.name}
-                      onChange={handleChange}
-                      disabled={formDisabled}
-                    />
-                    <Field.Error />
-                  </Field.Root>
-                </Grid.Item>
+                  <Grid.Item xs={12} col={6} direction="column" alignItems="stretch">
+                    <Field.Root id="folder-parent">
+                      <Field.Label>
+                        {formatMessage({
+                          id: getTrad('form.input.label.folder-location'),
+                          defaultMessage: 'Location',
+                        })}
+                      </Field.Label>
 
-                <Grid.Item xs={12} col={6} direction="column" alignItems="stretch">
-                  <Field.Root id="folder-parent">
-                    <Field.Label>
-                      {formatMessage({
-                        id: getTrad('form.input.label.folder-location'),
-                        defaultMessage: 'Location',
-                      })}
-                    </Field.Label>
+                      <SelectTree
+                        options={folderStructure!}
+                        onChange={(value) => {
+                          setFieldValue('parent', value);
+                        }}
+                        isDisabled={formDisabled}
+                        defaultValue={values.parent!}
+                        name="parent"
+                        menuPortalTarget={document.querySelector('body')}
+                        inputId="folder-parent"
+                        disabled={formDisabled}
+                        error={typeof errors.parent === 'string' ? errors.parent : undefined}
+                        ariaErrorMessage="folder-parent-error"
+                      />
 
-                    <SelectTree
-                      options={folderStructure!}
-                      onChange={(value) => {
-                        setFieldValue('parent', value);
-                      }}
-                      isDisabled={formDisabled}
-                      defaultValue={values.parent!}
-                      name="parent"
-                      menuPortalTarget={document.querySelector('body')}
-                      inputId="folder-parent"
-                      disabled={formDisabled}
-                      error={typeof errors.parent === 'string' ? errors.parent : undefined}
-                      ariaErrorMessage="folder-parent-error"
-                    />
-
-                    {errors.parent && (
-                      <Typography
-                        variant="pi"
-                        tag="p"
-                        id="folder-parent-error"
-                        textColor="danger600"
-                      >
-                        {typeof errors.parent === 'string' ? errors.parent : undefined}
-                      </Typography>
+                      {errors.parent && (
+                        <Typography
+                          variant="pi"
+                          tag="p"
+                          id="folder-parent-error"
+                          textColor="danger600"
+                        >
+                          {typeof errors.parent === 'string' ? errors.parent : undefined}
+                        </Typography>
+                      )}
+                    </Field.Root>
+                  </Grid.Item>
+                </Grid.Root>
+                <VisuallyHidden>
+                  <button type="submit" tabIndex={-1} ref={submitButtonRef} disabled={formDisabled}>
+                    {formatMessage(
+                      isEditing
+                        ? { id: getTrad('modal.folder.edit.submit'), defaultMessage: 'Save' }
+                        : { id: getTrad('modal.folder.create.submit'), defaultMessage: 'Create' }
                     )}
-                  </Field.Root>
-                </Grid.Item>
-              </Grid.Root>
+                  </button>
+                </VisuallyHidden>
+              </Form>
             </Modal.Body>
             <Modal.Footer>
               <Button onClick={() => onClose()} variant="tertiary" name="cancel">
@@ -303,7 +316,7 @@ export const EditFolderContent = ({
                   name="submit"
                   loading={isEditFolderLoading}
                   disabled={formDisabled}
-                  type="submit"
+                  onClick={() => submitButtonRef.current?.click()}
                 >
                   {formatMessage(
                     isEditing
@@ -313,7 +326,7 @@ export const EditFolderContent = ({
                 </Button>
               </Flex>
             </Modal.Footer>
-          </Form>
+          </>
         )}
       </Formik>
       <RemoveFolderDialog

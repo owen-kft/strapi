@@ -1,4 +1,15 @@
-import { Button, Flex, Grid, Field, Loader, Modal, Typography } from '@strapi/design-system';
+import * as React from 'react';
+
+import {
+  Button,
+  Flex,
+  Grid,
+  Field,
+  Loader,
+  Modal,
+  Typography,
+  VisuallyHidden,
+} from '@strapi/design-system';
 import { Form, Formik, FormikErrors } from 'formik';
 import isEmpty from 'lodash/isEmpty';
 import { useIntl } from 'react-intl';
@@ -37,6 +48,7 @@ export interface BulkMoveDialogProps {
 }
 
 export const BulkMoveDialog = ({ onClose, selected = [], currentFolder }: BulkMoveDialogProps) => {
+  const submitButtonRef = React.useRef<HTMLButtonElement>(null);
   const { formatMessage } = useIntl();
   const { data: folderStructure, isLoading } = useFolderStructure();
   const { move } = useBulkMove();
@@ -103,7 +115,7 @@ export const BulkMoveDialog = ({ onClose, selected = [], currentFolder }: BulkMo
     <Modal.Content>
       <Formik validateOnChange={false} onSubmit={handleSubmit} initialValues={initialFormData}>
         {({ values, errors, setFieldValue }) => (
-          <Form noValidate>
+          <>
             <Modal.Header>
               <Modal.Title>
                 {formatMessage({
@@ -114,39 +126,46 @@ export const BulkMoveDialog = ({ onClose, selected = [], currentFolder }: BulkMo
             </Modal.Header>
 
             <Modal.Body>
-              <Grid.Root gap={4}>
-                <Grid.Item xs={12} col={12} direction="column" alignItems="stretch">
-                  <Field.Root id="folder-destination">
-                    <Field.Label>
-                      {formatMessage({
-                        id: getTrad('form.input.label.folder-location'),
-                        defaultMessage: 'Location',
-                      })}
-                    </Field.Label>
+              <Form noValidate>
+                <Grid.Root gap={4}>
+                  <Grid.Item xs={12} col={12} direction="column" alignItems="stretch">
+                    <Field.Root id="folder-destination">
+                      <Field.Label>
+                        {formatMessage({
+                          id: getTrad('form.input.label.folder-location'),
+                          defaultMessage: 'Location',
+                        })}
+                      </Field.Label>
 
-                    <SelectTree
-                      options={folderStructure as OptionSelectTree[]}
-                      onChange={(value: Record<string, string | number>) => {
-                        setFieldValue('destination', value);
-                      }}
-                      defaultValue={
-                        typeof values.destination !== 'string' ? values.destination : undefined
-                      }
-                      name="destination"
-                      menuPortalTarget={document.querySelector('body')}
-                      inputId="folder-destination"
-                      error={errors?.destination}
-                      ariaErrorMessage="destination-error"
-                    />
+                      <SelectTree
+                        options={folderStructure as OptionSelectTree[]}
+                        onChange={(value: Record<string, string | number>) => {
+                          setFieldValue('destination', value);
+                        }}
+                        defaultValue={
+                          typeof values.destination !== 'string' ? values.destination : undefined
+                        }
+                        name="destination"
+                        menuPortalTarget={document.querySelector('body')}
+                        inputId="folder-destination"
+                        error={errors?.destination}
+                        ariaErrorMessage="destination-error"
+                      />
 
-                    {errors.destination && (
-                      <Typography variant="pi" tag="p" textColor="danger600">
-                        {errors.destination}
-                      </Typography>
-                    )}
-                  </Field.Root>
-                </Grid.Item>
-              </Grid.Root>
+                      {errors.destination && (
+                        <Typography variant="pi" tag="p" textColor="danger600">
+                          {errors.destination}
+                        </Typography>
+                      )}
+                    </Field.Root>
+                  </Grid.Item>
+                </Grid.Root>
+                <VisuallyHidden>
+                  <button type="submit" tabIndex={-1} ref={submitButtonRef}>
+                    {formatMessage({ id: 'modal.folder.move.submit', defaultMessage: 'Move' })}
+                  </button>
+                </VisuallyHidden>
+              </Form>
             </Modal.Body>
 
             <Modal.Footer>
@@ -155,11 +174,11 @@ export const BulkMoveDialog = ({ onClose, selected = [], currentFolder }: BulkMo
                   {formatMessage({ id: 'cancel', defaultMessage: 'Cancel' })}
                 </Button>
               </Modal.Close>
-              <Button type="submit" loading={isLoading}>
+              <Button onClick={() => submitButtonRef.current?.click()} loading={isLoading}>
                 {formatMessage({ id: 'modal.folder.move.submit', defaultMessage: 'Move' })}
               </Button>
             </Modal.Footer>
-          </Form>
+          </>
         )}
       </Formik>
     </Modal.Content>

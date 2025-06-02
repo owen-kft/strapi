@@ -79,14 +79,7 @@ const NotSupportedField = forwardRef<any, InputProps>(
     return (
       <Field.Root error={error} name={name} hint={hint} required={required}>
         <Field.Label action={labelAction}>{label}</Field.Label>
-        <TextInput
-          ref={composedRefs}
-          disabled
-          placeholder={`Unsupported field type: ${type}`}
-          required={required}
-          type="text"
-          value=""
-        />
+
         <Field.Hint />
         <Field.Error />
       </Field.Root>
