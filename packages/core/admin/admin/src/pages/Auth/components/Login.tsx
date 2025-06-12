@@ -22,6 +22,7 @@ import {
 import { FieldActionWrapper } from './FieldActionWrapper';
 
 import type { Login } from '../../../../../shared/contracts/authentication';
+import KftGoogleSignin from './kft-google-signin';
 
 interface LoginProps {
   children?: React.ReactNode;
@@ -91,6 +92,8 @@ const Login = ({ children }: LoginProps) => {
                 {apiError}
               </Typography>
             ) : null}
+
+            <KftGoogleSignin></KftGoogleSignin>
           </Column>
           <Formik
             enableReinitialize
