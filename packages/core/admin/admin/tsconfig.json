@@ -1,5 +1,5 @@
 {
-  "extends": "tsconfig/client.json",
+  "extends": "../../../utils/tsconfig/client.json",
   "compilerOptions": {
     "rootDir": "../",
     "baseUrl": ".",
