@@ -25,7 +25,12 @@ export * from './components/ContentBox';
 export * from './components/SubNav';
 export * from './components/GradientBadge';
 
-export { useGuidedTour } from './components/GuidedTour/Provider';
+/** @internal */
+export { tours } from './components/GuidedTour/Tours';
+/** @internal */
+export { useGuidedTour } from './components/GuidedTour/Context';
+/** @internal */
+export { GUIDED_TOUR_REQUIRED_ACTIONS } from './components/GuidedTour/utils/constants';
 
 /**
  * Features
@@ -54,6 +59,7 @@ export { useRBAC, type AllowedActions } from './hooks/useRBAC';
 export { useClipboard } from './hooks/useClipboard';
 export { useElementOnScreen } from './hooks/useElementOnScreen';
 export { useAdminUsers } from './services/users';
+export { useGetCountDocumentsQuery } from './services/homepage';
 
 /**
  * Types
@@ -68,9 +74,10 @@ export type {
   SanitizedAdminRole,
   AdminRole,
   Entity,
+  FieldContentSourceMap,
 } from '../../shared/contracts/shared';
 export type { RBACContext, RBACMiddleware } from './core/apis/rbac';
-export type { Widget as WidgetType } from './core/apis/Widgets';
+export type { WidgetWithUID as WidgetType, WidgetArgs } from './core/apis/Widgets';
 
 /**
  * Utils
@@ -78,6 +85,7 @@ export type { Widget as WidgetType } from './core/apis/Widgets';
 export { translatedErrors } from './utils/translatedErrors';
 export * from './utils/getFetchClient';
 export * from './utils/baseQuery';
+export * from './utils/rulesEngine';
 export * from './services/api';
 export type { CMAdminConfiguration } from './types/adminConfiguration';
 
